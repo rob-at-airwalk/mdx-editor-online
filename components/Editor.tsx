@@ -1,6 +1,8 @@
 /* eslint-disable react/no-unstable-nested-components */
-import '@mdxeditor/editor/style.css';
+import '@webtech0321/mdx-editor-collab/style.css';
 
+import dynamic from 'next/dynamic';
+import * as Y from "yjs";
 import {
   BlockTypeSelect,
   BoldItalicUnderlineToggles,
@@ -33,8 +35,10 @@ import {
   rootEditor$,
   usedLexicalNodes$,
   activeEditor$,
-} from '@mdxeditor/editor';
-
+  TableNode,
+  CodeBlockNode,
+  DirectiveNode,
+} from '@webtech0321/mdx-editor-collab';
 import SaveIcon from '@mui/icons-material/Save';
 import { Alert, css, Fab } from '@mui/material';
 import CircularProgress from '@mui/material/CircularProgress';
@@ -51,24 +55,14 @@ import React, {
 } from 'react';
 import type { ContentItem } from '@/lib/Types';
 import { baseTheme } from '@/styles/baseTheme';
-// import { CollaborationPlugin } from "@lexical/react/LexicalCollaborationPlugin";
 import { WebsocketProvider } from 'y-websocket';
-import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
-import { ContentEditable } from '@lexical/react/LexicalContentEditable';
-import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary';
 import {
   $createParagraphNode,
   $createTextNode,
   $getRoot,
-  EditorState,
   LexicalEditor,
   createEditor,
 } from "lexical";
-import * as Y from "yjs";
-// @ts-ignore
-import { RichTextPlugin } from '@lexical/react/LexicalRichTextPlugin';
-import { LexicalComposer } from '@lexical/react/LexicalComposer';
-import dynamic from 'next/dynamic';
 
 const CollaborationPlugin = dynamic(
   () => import("@lexical/react/LexicalCollaborationPlugin").then((mod) => mod.CollaborationPlugin),
@@ -76,19 +70,6 @@ const CollaborationPlugin = dynamic(
     ssr: false,
   }
 );
-
-const initialConfig = {
-  // NOTE: This is critical for collaboration plugin to set editor state to null. It
-  // would indicate that the editor should not try to set any default state
-  // (not even empty one), and let collaboration plugin do it instead
-  editorState: null,
-  namespace: "Demo",
-  nodes: [],
-  onError: (error: Error) => {
-    throw error;
-  },
-  theme: {},
-};
 
 const toKebabCase = (str: string) => {
   return str.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase();
@@ -225,6 +206,7 @@ const Editor = React.memo(function EditorC({
 
   const collaborationPlugin = useMemo(() => realmPlugin({
     postInit(realm) {
+      const rootEditor = realm.getValue(rootEditor$);      
       const newEditor = createEditor({
         editable: true,
         namespace: 'MDXEditor',
@@ -232,19 +214,23 @@ const Editor = React.memo(function EditorC({
         onError: (error) => {
           throw error
         },
-        // theme: lexicalTheme
+        theme: rootEditor?._config.theme
       })
       realm.pub(rootEditor$, newEditor)
       realm.pub(activeEditor$, newEditor)
 
+      const excludedProperties = new Map()
+      excludedProperties.set(TableNode, new Set(["focusEmitter"]))
+      excludedProperties.set(CodeBlockNode, new Set(["__focusEmitter", "setCode", "setMeta", "setLanguage", "select"]))
+      excludedProperties.set(DirectiveNode, new Set(["__focusEmitter"]))
+
       realm.pub(addComposerChild$, () => (
         <CollaborationPlugin 
-          id="test06"
+          id="test05"
           // @ts-ignore
           providerFactory={(id, yjsDocMap) => {
             const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
             let doc = yjsDocMap.get(id);
-
             if (doc === undefined) {
               doc = new Y.Doc();
               yjsDocMap.set(id, doc);
@@ -261,6 +247,7 @@ const Editor = React.memo(function EditorC({
           }}
           initialEditorState={initialEditorState}
           shouldBootstrap={false}
+          excludedProperties={excludedProperties}
           // username={`ABC-${Math.floor(Math.random() * 100)}`}
         />
         ),

@@ -2,7 +2,7 @@
 import dynamic from 'next/dynamic';
 
 import { ContentItem } from "@/lib/Types";
-import { MDXEditorMethods } from "@mdxeditor/editor";
+import { MDXEditorMethods } from "@webtech0321/mdx-editor-collab";
 import { useRef } from 'react';
 import Editor from '@/components/Editor';
 
