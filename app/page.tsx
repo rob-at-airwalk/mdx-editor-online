@@ -3,8 +3,8 @@ import dynamic from 'next/dynamic';
 
 import { ContentItem } from "@/lib/Types";
 import { MDXEditorMethods } from "@webtech0321/mdx-editor-collab";
-import { useRef } from 'react';
-import Editor from '@/components/Editor';
+import { useRef, useState } from 'react';
+import { Editor } from '@/components/Editor2';
 
 const dummyContext: ContentItem = {
   source: 'github',
@@ -28,6 +28,8 @@ const dummyDefaultContext: ContentItem = {
 
 export default function Home() {
   const editorRef = useRef<MDXEditorMethods | null>(null);
+  const [colabId, setColabId] = useState("test05")
+  const [markdown, setMarkdown] = useState("")
 
   const imageUploadHandler = async () => {
     // console.log('Image upload handler called with image:', image);
@@ -41,12 +43,25 @@ export default function Home() {
     );
   }
   
-  const onSave = async () => {
+  const onSave = async (arg: string) => {
+    setMarkdown(arg);
     return Promise.resolve('successfully saved file');
   }
 
   return (
+    // <Editor 
+    //   context={dummyContext}
+    //   defaultContext={dummyDefaultContext}
+    //   editorRef={editorRef}
+    //   editorSaveHandler={onSave}
+    //   enabled
+    //   imagePreviewHandler={imagePreviewHandler}
+    //   imageUploadHandler={imageUploadHandler}
+    //   markdown=""
+    //   top={220}
+    // />
     <Editor 
+      colabID={colabId}
       context={dummyContext}
       defaultContext={dummyDefaultContext}
       editorRef={editorRef}
@@ -54,7 +69,7 @@ export default function Home() {
       enabled
       imagePreviewHandler={imagePreviewHandler}
       imageUploadHandler={imageUploadHandler}
-      markdown=""
+      markdown={markdown}
       top={220}
     />
   );
