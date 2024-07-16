@@ -259,22 +259,18 @@ const Editor = React.memo(function EditorC({
                   doc
                 );
 
-                // provider.on('status', (event: { status: string }) => {
-                //   if (event.status === 'connected') {
-                //     const meta = doc.getMap('meta');
-                //     if (isNewDocument || !meta.has('initialized')) {
-                //       logger.info('NOT initialized');
-                //     } else {
-                //       logger.info('initialized');
-                //     }
-                //   }
-                // });
+                provider.on('status', (event: { status: string }) => {
+                  if (event.status === 'connecting' || event.status === 'disconnected') {
+                    if (editorRef && editorRef.current) {
+                      editorRef.current.setMarkdown(initialMarkdown);
+                    }
+                  }
+                });
 
                 provider.on('synced', () => {
                   // The 'synced' event ensures all data has been loaded
                   // initializeDocument(doc, initialMarkdown, editorRef);
                   const meta = doc.getMap('metadata');
-
                   // Check if the document has been initialized
                   if (!meta.get('initialized')) {
                     // Set the document as initialized
