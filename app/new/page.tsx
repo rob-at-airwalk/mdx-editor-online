@@ -4,7 +4,15 @@ import dynamic from 'next/dynamic';
 import { ContentItem } from "@/lib/Types";
 import { MDXEditorMethods } from "@webtech0321/mdx-editor-collab";
 import { useRef, useState } from 'react';
-import { Editor } from '@/components/new/EditorNew';
+// import { Editor } from '@/components/new/EditorNew';
+
+
+const Editor = dynamic(
+  () => import('@/components/new/EditorNew').then((mod) => mod.Editor),
+  {
+    ssr: false,
+  }
+);
 
 const dummyContext: ContentItem = {
   source: 'github',

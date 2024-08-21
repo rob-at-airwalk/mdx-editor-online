@@ -1,5 +1,5 @@
 /* eslint-disable react/no-unstable-nested-components */
-import '@webtech0321/mdx-editor-collab/style.css';
+import '@mdxeditor/editor/style.css';
 
 import SaveIcon from '@mui/icons-material/Save';
 import { Alert, css, Fab } from '@mui/material';
@@ -43,7 +43,7 @@ import {
   toolbarPlugin,
   UndoRedo,
   usedLexicalNodes$,
-} from '@webtech0321/mdx-editor-collab';
+} from '@mdxeditor/editor';
 import { createEditor } from 'lexical';
 import dynamic from 'next/dynamic';
 import React, {
@@ -200,13 +200,6 @@ const Editor = React.memo(function EditorC({
     [initialMarkdown, defaultContext, context.branch]
   );
 
-  // const initialEditorState = (_editor: LexicalEditor): void => {
-  //   const root = $getRoot();
-  //   const paragraph = $createParagraphNode();
-  //   const text = $createTextNode();
-  //   paragraph.append(text);
-  //   root.append(paragraph);
-  // };
 
   const collaborationPlugin = useMemo(
     () =>
@@ -216,7 +209,7 @@ const Editor = React.memo(function EditorC({
           const newEditor = createEditor({
             editable: true,
             namespace: 'MDXEditor',
-            nodes: realm.getValue(usedLexicalNodes$),
+            nodes: realm.getValue(usedLexicalNodes$) ?? [],
             onError: (err: any) => {
               throw err;
             },
